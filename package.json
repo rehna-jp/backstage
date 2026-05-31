@@ -1,0 +1,16 @@
+{
+  "name": "backstage",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "test:contracts": "cd contracts && forge test -vvv"
+  },
+  "pnpm": {
+    "overrides": {
+      "@peculiar/webcrypto": "1.7.0"
+    }
+  }
+}

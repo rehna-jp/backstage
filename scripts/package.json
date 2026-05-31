@@ -1,0 +1,28 @@
+{
+  "name": "@backstage/scripts",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "publish-work": "tsx src/01-publish-work.ts",
+    "buy-unlock": "tsx src/02-buy-and-unlock.ts",
+    "time-locked-drop": "tsx src/03-time-locked-drop.ts"
+  },
+  "dependencies": {
+    "@helia/unixfs": "^4.0.0",
+    "@piplabs/cdr-sdk": "^0.2.1",
+    "@story-protocol/core-sdk": "^1.3.0",
+    "helia": "^5.0.0",
+    "multiformats": "^13.0.0",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Environment
+.env
+.env.local
+contracts/.env
+
+# Build outputs
+.next
+dist
+out
+web/.next
+
+# Foundry
+contracts/out
+contracts/cache
+contracts/broadcast
+
+# Misc
+.DS_Store
+*.log
+
+# Temp/generated
+web/next-env.d.ts
