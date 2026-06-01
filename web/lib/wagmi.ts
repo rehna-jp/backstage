@@ -17,7 +17,7 @@ export const aeneid = defineChain({
 
 export const wagmiConfig = getDefaultConfig({
   appName: "Backstage",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "backstage-hackathon",
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "backstage-hackathon",
   chains: [aeneid],
   transports: { [aeneid.id]: http() },
   ssr: true,
