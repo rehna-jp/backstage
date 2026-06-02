@@ -26,12 +26,20 @@ export function NavBar() {
             Verify License
           </Link>
           {isConnected && (
-            <Link
-              href="/dashboard"
-              className="text-sm text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
-            >
-              Dashboard
-            </Link>
+            <>
+              <Link
+                href="/upload"
+                className="rounded-lg bg-[--color-accent] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[--color-accent-dim] transition-colors"
+              >
+                Publish
+              </Link>
+              <Link
+                href="/dashboard"
+                className="text-sm text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
+              >
+                Dashboard
+              </Link>
+            </>
           )}
           <ConnectButton
             showBalance={false}
