@@ -105,7 +105,7 @@ export function TierModal({ work, onUnlocked }: Props) {
         network: "testnet",
         publicClient: publicClient as any,
         walletClient: walletClient as any,
-        apiUrl: "http://172.192.41.96:1317",
+        apiUrl: process.env.NEXT_PUBLIC_CDR_API_URL ?? "http://172.192.41.96:1317",
       });
 
       const storage = new GatewayProvider({

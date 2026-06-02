@@ -2,8 +2,11 @@
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
+import { useAccount } from "wagmi";
 
 export function NavBar() {
+  const { isConnected } = useAccount();
+
   return (
     <header className="sticky top-0 z-40 border-b border-[--color-border] bg-[--color-background]/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -22,6 +25,14 @@ export function NavBar() {
           >
             Verify License
           </Link>
+          {isConnected && (
+            <Link
+              href="/dashboard"
+              className="text-sm text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
+            >
+              Dashboard
+            </Link>
+          )}
           <ConnectButton
             showBalance={false}
             chainStatus="none"
