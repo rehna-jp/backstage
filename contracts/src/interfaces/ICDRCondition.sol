@@ -2,11 +2,20 @@
 pragma solidity 0.8.24;
 
 /// @notice CDR read condition interface.
-///         The CDR precompile staticcalls this on every `read()` transaction
-///         for vaults that use a contract read condition.
+///         The CDR precompile staticcalls this on every `read()` transaction.
 ///
-///         Verified against LicenseReadCondition bytecode on Aeneid (selector 0x8db3eb17):
-///         checkReadCondition(uint32,bytes,bytes,address)
+///         Two ABI-compatible variants exist and BOTH must be implemented:
+///
+///         4-param (0x8db3eb17) — used by the CDR precompile on-chain:
+///           checkReadCondition(uint32,bytes,bytes,address)
+///
+///         3-param (0x9b3e201d) — used by DKG validators for off-chain eth_call
+///           condition checks before they submit partial decryptions:
+///           checkReadCondition(address,bytes,bytes)
+///
+///         This interface declares the 4-param version as the canonical form
+///         (matching the deployed LicenseReadCondition bytecode on Aeneid).
+///         Implementing contracts should also add a 3-param overload.
 interface ICDRReadCondition {
     /// @param uuid           CDR vault UUID being read
     /// @param accessAuxData  ABI-encoded proof supplied by the caller at read time
@@ -22,8 +31,7 @@ interface ICDRReadCondition {
 }
 
 /// @notice CDR write condition interface.
-///         The CDR precompile staticcalls this on every `write()` transaction
-///         for vaults that use a contract write condition.
+///         The CDR precompile staticcalls this on every `write()` transaction.
 interface ICDRWriteCondition {
     /// @param caller         msg.sender of the CDR write() call
     /// @param conditionData  ABI-encoded config stored at vault allocation time

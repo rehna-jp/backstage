@@ -30,28 +30,49 @@ import {ILicenseToken} from "./interfaces/ILicenseToken.sol";
 ///           3. token encodes the required License Terms ID
 ///           4. token has not been revoked
 ///
+///         This contract implements BOTH the 4-param interface (0x8db3eb17,
+///         used by the CDR precompile on-chain) and the 3-param interface
+///         (0x9b3e201d, used by DKG validators for their off-chain eth_call
+///         condition checks). Both dispatch to the same internal logic.
+///
 ///         This contract is stateless and immutable. Deploy one instance and
 ///         reuse it for every tier / IP Asset combination by varying
 ///         conditionData at allocation time.
-///
-///         See: piplabs/cdr-sdk docs/CONDITIONS.md for the condition interface spec.
-///              storyprotocol/protocol-core-v1 contracts/interfaces/ILicenseToken.sol
 contract TieredLicenseReadCondition is ICDRReadCondition {
     /// @dev Cap on token IDs per read call. Prevents gas exhaustion through
     ///      unbounded external call loops; one matching token is always enough.
     uint256 private constant MAX_TOKEN_IDS = 10;
 
-    /// @inheritdoc ICDRReadCondition
-    /// @dev      The CDR precompile staticcalls this function; it must not modify state.
-    ///           ownerOf() is wrapped in try/catch because OZ v5 reverts with
-    ///           ERC721NonexistentToken for non-existent IDs — we skip those
-    ///           rather than letting the revert propagate and block the read tx.
+    /// @notice 4-param version — selector 0x8db3eb17.
+    ///         Called by the CDR precompile during on-chain read() validation.
     function checkReadCondition(
         uint32 /* uuid */,
         bytes calldata accessAuxData,
         bytes calldata conditionData,
         address caller
     ) external view returns (bool) {
+        return _check(caller, conditionData, accessAuxData);
+    }
+
+    /// @notice 3-param version — selector 0x9b3e201d.
+    ///         Called by DKG validators for off-chain condition verification
+    ///         before they submit partial decryptions.
+    function checkReadCondition(
+        address caller,
+        bytes calldata conditionData,
+        bytes calldata accessAuxData
+    ) external view returns (bool) {
+        return _check(caller, conditionData, accessAuxData);
+    }
+
+    /// @dev Core condition logic shared by both ABI-compatible entry points.
+    ///      ownerOf() is wrapped in try/catch because OZ v5 reverts with
+    ///      ERC721NonexistentToken for non-existent IDs — skip rather than revert.
+    function _check(
+        address caller,
+        bytes calldata conditionData,
+        bytes calldata accessAuxData
+    ) internal view returns (bool) {
         (address licenseToken, address ipId, uint256 requiredTermsId) =
             abi.decode(conditionData, (address, address, uint256));
 
@@ -66,8 +87,6 @@ contract TieredLicenseReadCondition is ICDRReadCondition {
         for (uint256 i = 0; i < len; ) {
             uint256 tokenId = tokenIds[i];
 
-            // ownerOf reverts for non-existent tokens (OZ v5 ERC721NonexistentToken).
-            // Catch and skip so a stale or fabricated ID never blocks the whole check.
             address owner;
             try lt.ownerOf(tokenId) returns (address _owner) {
                 owner = _owner;

@@ -31,16 +31,39 @@ import {ICDRReadCondition} from "./interfaces/ICDRCondition.sol";
 ///         └────────────────────────────────────────────────────────────────────┘
 ///         accessAuxData is forwarded unchanged to the inner condition.
 ///
-///         Like TieredLicenseReadCondition this contract is stateless; deploy once
-///         and reuse across drops.
+///         Like TieredLicenseReadCondition this contract implements BOTH the
+///         4-param (0x8db3eb17) and 3-param (0x9b3e201d) interfaces so it works
+///         with both the CDR precompile and the DKG validator off-chain checks.
+///
+///         Deploy once; reuse across drops.
 contract TimeWindowedReadCondition is ICDRReadCondition {
-    /// @inheritdoc ICDRReadCondition
+    /// @notice 4-param version — selector 0x8db3eb17.
+    ///         Called by the CDR precompile during on-chain read() validation.
     function checkReadCondition(
         uint32 uuid,
         bytes calldata accessAuxData,
         bytes calldata conditionData,
         address caller
     ) external view returns (bool) {
+        return _check(uuid, caller, conditionData, accessAuxData);
+    }
+
+    /// @notice 3-param version — selector 0x9b3e201d.
+    ///         Called by DKG validators for off-chain condition verification.
+    function checkReadCondition(
+        address caller,
+        bytes calldata conditionData,
+        bytes calldata accessAuxData
+    ) external view returns (bool) {
+        return _check(0, caller, conditionData, accessAuxData);
+    }
+
+    function _check(
+        uint32 uuid,
+        address caller,
+        bytes calldata conditionData,
+        bytes calldata accessAuxData
+    ) internal view returns (bool) {
         (
             address tieredReadCond,
             bytes memory tieredCondData,
