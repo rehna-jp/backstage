@@ -36,9 +36,10 @@ import {ICDRReadCondition} from "./interfaces/ICDRCondition.sol";
 contract TimeWindowedReadCondition is ICDRReadCondition {
     /// @inheritdoc ICDRReadCondition
     function checkReadCondition(
-        address caller,
+        uint32 uuid,
+        bytes calldata accessAuxData,
         bytes calldata conditionData,
-        bytes calldata accessAuxData
+        address caller
     ) external view returns (bool) {
         (
             address tieredReadCond,
@@ -51,7 +52,7 @@ contract TimeWindowedReadCondition is ICDRReadCondition {
         // Public window: open to all callers who satisfy the inner tier condition.
         if (block.timestamp >= releaseAt) {
             return ICDRReadCondition(tieredReadCond).checkReadCondition(
-                caller, tieredCondData, accessAuxData
+                uuid, accessAuxData, tieredCondData, caller
             );
         }
 
@@ -63,7 +64,7 @@ contract TimeWindowedReadCondition is ICDRReadCondition {
             IERC721(subscriptionNft).balanceOf(caller) > 0
         ) {
             return ICDRReadCondition(tieredReadCond).checkReadCondition(
-                caller, tieredCondData, accessAuxData
+                uuid, accessAuxData, tieredCondData, caller
             );
         }
 

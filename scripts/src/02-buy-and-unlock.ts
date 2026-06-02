@@ -21,7 +21,10 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { StoryClient } from "@story-protocol/core-sdk";
-import { CDRClient, initWasm, GatewayProvider } from "@piplabs/cdr-sdk";
+import { CDRClient, initWasm, HeliaProvider } from "@piplabs/cdr-sdk";
+import { createHelia } from "helia";
+import { unixfs } from "@helia/unixfs";
+import { CID } from "multiformats/cid";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -84,18 +87,32 @@ async function main() {
   const storyClient  = StoryClient.newClient({ transport: http(RPC_URL), account: buyerAccount, chainId: "aeneid" });
   const cdrClient    = new CDRClient({ network: "testnet", publicClient, walletClient, apiUrl: API_URL });
 
-  // ── Step 1: Deposit IP → WIP ───────────────────────────────────────────────
-  stepHdr(1, "Deposit 2 IP → 2 WIP");
+  // ── Step 1: Deposit IP → WIP (skip if already have enough WIP) ───────────────
+  stepHdr(1, "Check / deposit WIP");
 
-  const depositResult = await storyClient.wipClient.deposit({ amount: parseEther("2") });
-  log("WIP Deposit", "2 IP → 2 WIP", depositResult.txHash);
+  const WIP_TOKEN = "0x1514000000000000000000000000000000000000" as `0x${string}`;
+  const wipBalance = await publicClient.readContract({
+    address: WIP_TOKEN,
+    abi: [{ name: "balanceOf", type: "function", stateMutability: "view",
+            inputs: [{ name: "account", type: "address" }],
+            outputs: [{ name: "", type: "uint256" }] }],
+    functionName: "balanceOf",
+    args: [buyerAccount.address],
+  }) as bigint;
+
+  if (wipBalance < parseEther("0.1")) {
+    const depositResult = await storyClient.wipClient.deposit({ amount: parseEther("0.1") });
+    log("WIP Deposit", "0.1 IP → 0.1 WIP", depositResult.txHash);
+  } else {
+    log("WIP Balance", `already have ${(Number(wipBalance) / 1e18).toFixed(2)} WIP — skipping deposit`);
+  }
 
   // ── Step 2: Approve RoyaltyModule ─────────────────────────────────────────
-  stepHdr(2, "Approve RoyaltyModule for 2 WIP");
+  stepHdr(2, "Approve RoyaltyModule for 0.1 WIP");
 
   const approveResult = await storyClient.wipClient.approve({
     spender: ROYALTY_MODULE,
-    amount:  parseEther("2"),
+    amount:  parseEther("0.1"),
   });
   log("WIP Approve", "RoyaltyModule approved", approveResult.txHash);
 
@@ -121,12 +138,12 @@ async function main() {
   );
   log("accessAuxData", `token IDs encoded: [${licenseTokenId}]`);
 
-  // GatewayProvider: downloads the encrypted file from a public IPFS gateway.
-  // The CID was announced to the DHT when Helia uploaded it in script 01.
-  const storage = new GatewayProvider({
-    apiUrl:     "https://ipfs.io",
-    gatewayUrl: "https://ipfs.io/ipfs",
-  });
+  // HeliaProvider: use a Helia node to fetch the encrypted file via DHT.
+  // The file was uploaded and DHT-announced by script 01.
+  console.log("  Starting Helia node…");
+  const helia   = await createHelia();
+  const heliaFS = unixfs(helia);
+  const storage = new HeliaProvider({ helia, unixfs: heliaFS, CID: (str: string) => CID.parse(str) });
 
   console.log(`  Vault uuid=${fullTrackUuid}  CID=${fullTrackCid}`);
   console.log("  Waiting for validator partial decryptions (up to 120 s)…");
@@ -147,6 +164,8 @@ async function main() {
   const outPath = resolve(__dirname, "../output/decrypted-track.mp3");
   writeFileSync(outPath, decryptedBytes);
   log("Output", `${outPath}  (${(decryptedBytes.length / 1e6).toFixed(2)} MB)`);
+
+  await helia.stop();
 
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
   console.log(`\n${"═".repeat(64)}`);

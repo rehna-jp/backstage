@@ -13,7 +13,7 @@ contract MockInnerCondition {
 
     constructor(bool result_) { _result = result_; }
 
-    function checkReadCondition(address, bytes calldata, bytes calldata)
+    function checkReadCondition(uint32, bytes calldata, bytes calldata, address)
         external view returns (bool)
     {
         return _result;
@@ -22,7 +22,7 @@ contract MockInnerCondition {
 
 /// @dev Reentrant/reverting stub — always reverts on checkReadCondition.
 contract RevertingInnerCondition {
-    function checkReadCondition(address, bytes calldata, bytes calldata)
+    function checkReadCondition(uint32, bytes calldata, bytes calldata, address)
         external pure returns (bool)
     {
         revert("inner revert");
@@ -79,8 +79,8 @@ contract TimeWindowedReadConditionTest is Test {
             address(innerTrue), "", EARLY_AT, RELEASE, address(subNft)
         );
         // NOW < EARLY_AT — even a subscriber with a passing inner condition is blocked.
-        assertFalse(condition.checkReadCondition(SUBSCRIBER, cd, "0x"));
-        assertFalse(condition.checkReadCondition(PUBLIC_USER, cd, "0x"));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, SUBSCRIBER));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, PUBLIC_USER));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerTrue), "", EARLY_AT, RELEASE, address(subNft)
         );
-        assertTrue(condition.checkReadCondition(SUBSCRIBER, cd, "0x"));
+        assertTrue(condition.checkReadCondition(0, "0x", cd, SUBSCRIBER));
     }
 
     function test_non_subscriber_blocked_in_early_window() public {
@@ -100,7 +100,7 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerTrue), "", EARLY_AT, RELEASE, address(subNft)
         );
-        assertFalse(condition.checkReadCondition(PUBLIC_USER, cd, "0x"));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, PUBLIC_USER));
     }
 
     function test_subscriber_blocked_when_inner_condition_fails() public {
@@ -108,7 +108,7 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerFalse), "", EARLY_AT, RELEASE, address(subNft)
         );
-        assertFalse(condition.checkReadCondition(SUBSCRIBER, cd, "0x"));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, SUBSCRIBER));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -120,8 +120,8 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerTrue), "", EARLY_AT, RELEASE, address(subNft)
         );
-        assertTrue(condition.checkReadCondition(PUBLIC_USER, cd, "0x"));
-        assertTrue(condition.checkReadCondition(SUBSCRIBER,  cd, "0x"));
+        assertTrue(condition.checkReadCondition(0, "0x", cd, PUBLIC_USER));
+        assertTrue(condition.checkReadCondition(0, "0x", cd, SUBSCRIBER));
     }
 
     function test_public_blocked_when_inner_condition_fails() public {
@@ -129,7 +129,7 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerFalse), "", EARLY_AT, RELEASE, address(subNft)
         );
-        assertFalse(condition.checkReadCondition(PUBLIC_USER, cd, "0x"));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, PUBLIC_USER));
     }
 
     function test_public_passes_long_after_release() public {
@@ -137,7 +137,7 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerTrue), "", EARLY_AT, RELEASE, address(subNft)
         );
-        assertTrue(condition.checkReadCondition(PUBLIC_USER, cd, "0x"));
+        assertTrue(condition.checkReadCondition(0, "0x", cd, PUBLIC_USER));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -150,7 +150,7 @@ contract TimeWindowedReadConditionTest is Test {
             address(innerTrue), "", 0 /* earlyAt=0 */, RELEASE, address(subNft)
         );
         // Subscriber cannot access before releaseAt because earlyAt == 0.
-        assertFalse(condition.checkReadCondition(SUBSCRIBER, cd, "0x"));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, SUBSCRIBER));
     }
 
     function test_public_still_works_after_release_when_early_at_is_zero() public {
@@ -158,7 +158,7 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerTrue), "", 0, RELEASE, address(subNft)
         );
-        assertTrue(condition.checkReadCondition(PUBLIC_USER, cd, "0x"));
+        assertTrue(condition.checkReadCondition(0, "0x", cd, PUBLIC_USER));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -170,7 +170,7 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerTrue), "", EARLY_AT, RELEASE, address(0)
         );
-        assertFalse(condition.checkReadCondition(SUBSCRIBER, cd, "0x"));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, SUBSCRIBER));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -202,12 +202,12 @@ contract TimeWindowedReadConditionTest is Test {
         );
 
         // Should pass because SUBSCRIBER owns token 7 which satisfies tiered condition.
-        assertTrue(condition.checkReadCondition(SUBSCRIBER, cd, auxData));
+        assertTrue(condition.checkReadCondition(0, auxData, cd, SUBSCRIBER));
 
         // Should fail with an unregistered token ID.
         uint256[] memory wrongIds = new uint256[](1);
         wrongIds[0] = 99;
-        assertFalse(condition.checkReadCondition(SUBSCRIBER, cd, abi.encode(wrongIds)));
+        assertFalse(condition.checkReadCondition(0, abi.encode(wrongIds), cd, SUBSCRIBER));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -222,8 +222,8 @@ contract TimeWindowedReadConditionTest is Test {
             address(innerTrue), "", EARLY_AT, distantFuture, address(subNft)
         );
 
-        assertTrue(condition.checkReadCondition(SUBSCRIBER,  cd, "0x"));
-        assertFalse(condition.checkReadCondition(PUBLIC_USER, cd, "0x"));
+        assertTrue(condition.checkReadCondition(0, "0x", cd, SUBSCRIBER));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, PUBLIC_USER));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -237,8 +237,8 @@ contract TimeWindowedReadConditionTest is Test {
         bytes memory cd = _condData(
             address(innerTrue), "", EARLY_AT, RELEASE, address(subNft)
         );
-        assertFalse(condition.checkReadCondition(SUBSCRIBER,  cd, "0x"));
-        assertFalse(condition.checkReadCondition(PUBLIC_USER, cd, "0x"));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, SUBSCRIBER));
+        assertFalse(condition.checkReadCondition(0, "0x", cd, PUBLIC_USER));
     }
 
     function testFuzz_after_release_inner_result_propagates(bool innerResult, uint256 ts) public {
@@ -251,7 +251,7 @@ contract TimeWindowedReadConditionTest is Test {
         );
 
         assertEq(
-            condition.checkReadCondition(PUBLIC_USER, cd, "0x"),
+            condition.checkReadCondition(0, "0x", cd, PUBLIC_USER),
             innerResult
         );
     }

@@ -114,9 +114,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertTrue(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -130,9 +131,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                STRANGER, // caller != token owner
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(1))
+                STRANGER // caller != token owner
             )
         );
     }
@@ -143,9 +145,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -155,9 +158,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -167,9 +171,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -182,9 +187,10 @@ contract TieredLicenseReadConditionTest is Test {
         // Token 999 was never set; ownerOf will revert → should be skipped, not propagated.
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(999)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(999))
+                BUYER
             )
         );
     }
@@ -194,9 +200,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertTrue(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_two(999, 2)), // 999 skipped, 2 passes
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_two(999, 2)) // 999 skipped, 2 passes
+                BUYER
             )
         );
     }
@@ -204,9 +211,10 @@ contract TieredLicenseReadConditionTest is Test {
     function test_rejects_empty_token_array() public view {
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                abi.encode(new uint256[](0)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                abi.encode(new uint256[](0))
+                BUYER
             )
         );
     }
@@ -221,9 +229,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertTrue(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_two(1, 2)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_two(1, 2))
+                BUYER
             )
         );
     }
@@ -241,9 +250,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(ids),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(ids)
+                BUYER
             )
         );
     }
@@ -260,9 +270,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertTrue(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(ids),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(ids)
+                BUYER
             )
         );
     }
@@ -276,9 +287,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, DOWNLOAD_TERMS_ID), // download vault
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -288,9 +300,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, COMMERCIAL_TERMS_ID), // commercial vault
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -303,17 +316,17 @@ contract TieredLicenseReadConditionTest is Test {
 
         // Stream vault: allowed.
         assertTrue(condition.checkReadCondition(
-            BUYER, _condData(address(lt), IP_ID, STREAM_TERMS_ID), auxData
+            0, auxData, _condData(address(lt), IP_ID, STREAM_TERMS_ID), BUYER
         ));
 
         // Download vault: blocked.
         assertFalse(condition.checkReadCondition(
-            BUYER, _condData(address(lt), IP_ID, DOWNLOAD_TERMS_ID), auxData
+            0, auxData, _condData(address(lt), IP_ID, DOWNLOAD_TERMS_ID), BUYER
         ));
 
         // Commercial vault: blocked.
         assertFalse(condition.checkReadCondition(
-            BUYER, _condData(address(lt), IP_ID, COMMERCIAL_TERMS_ID), auxData
+            0, auxData, _condData(address(lt), IP_ID, COMMERCIAL_TERMS_ID), BUYER
         ));
     }
 
@@ -323,13 +336,13 @@ contract TieredLicenseReadConditionTest is Test {
         bytes memory auxData = _auxData(_one(200));
 
         assertFalse(condition.checkReadCondition(
-            BUYER, _condData(address(lt), IP_ID, STREAM_TERMS_ID), auxData
+            0, auxData, _condData(address(lt), IP_ID, STREAM_TERMS_ID), BUYER
         ));
         assertFalse(condition.checkReadCondition(
-            BUYER, _condData(address(lt), IP_ID, DOWNLOAD_TERMS_ID), auxData
+            0, auxData, _condData(address(lt), IP_ID, DOWNLOAD_TERMS_ID), BUYER
         ));
         assertTrue(condition.checkReadCondition(
-            BUYER, _condData(address(lt), IP_ID, COMMERCIAL_TERMS_ID), auxData
+            0, auxData, _condData(address(lt), IP_ID, COMMERCIAL_TERMS_ID), BUYER
         ));
     }
 
@@ -339,9 +352,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID), // vault for IP_ID
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -356,9 +370,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                wrongCaller,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(1))
+                wrongCaller
             )
         );
     }
@@ -369,9 +384,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -382,9 +398,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertFalse(
             condition.checkReadCondition(
-                BUYER,
+                0,
+                _auxData(_one(1)),
                 _condData(address(lt), IP_ID, STREAM_TERMS_ID),
-                _auxData(_one(1))
+                BUYER
             )
         );
     }
@@ -402,9 +419,10 @@ contract TieredLicenseReadConditionTest is Test {
 
         assertTrue(
             condition.checkReadCondition(
-                buyer_,
+                0,
+                _auxData(_one(tokenId_)),
                 _condData(address(lt), ipId_, termsId_),
-                _auxData(_one(tokenId_))
+                buyer_
             )
         );
     }

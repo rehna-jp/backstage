@@ -5,17 +5,19 @@ pragma solidity 0.8.24;
 ///         The CDR precompile staticcalls this on every `read()` transaction
 ///         for vaults that use a contract read condition.
 ///
-///         Source of truth: piplabs/cdr-sdk docs/CONDITIONS.md
-///         Parameter order: (caller, conditionData, accessAuxData) — three params, no uuid.
+///         Verified against LicenseReadCondition bytecode on Aeneid (selector 0x8db3eb17):
+///         checkReadCondition(uint32,bytes,bytes,address)
 interface ICDRReadCondition {
-    /// @param caller         msg.sender of the CDR read() call (the decryptor wallet)
-    /// @param conditionData  ABI-encoded config stored at vault allocation time by the creator
+    /// @param uuid           CDR vault UUID being read
     /// @param accessAuxData  ABI-encoded proof supplied by the caller at read time
+    /// @param conditionData  ABI-encoded config stored at vault allocation time by the creator
+    /// @param caller         msg.sender of the CDR read() call (the decryptor wallet)
     /// @return               true to permit decryption, false to reject
     function checkReadCondition(
-        address caller,
+        uint32 uuid,
+        bytes calldata accessAuxData,
         bytes calldata conditionData,
-        bytes calldata accessAuxData
+        address caller
     ) external view returns (bool);
 }
 

@@ -47,9 +47,10 @@ contract TieredLicenseReadCondition is ICDRReadCondition {
     ///           ERC721NonexistentToken for non-existent IDs — we skip those
     ///           rather than letting the revert propagate and block the read tx.
     function checkReadCondition(
-        address caller,
+        uint32 /* uuid */,
+        bytes calldata accessAuxData,
         bytes calldata conditionData,
-        bytes calldata accessAuxData
+        address caller
     ) external view returns (bool) {
         (address licenseToken, address ipId, uint256 requiredTermsId) =
             abi.decode(conditionData, (address, address, uint256));
