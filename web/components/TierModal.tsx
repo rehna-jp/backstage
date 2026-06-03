@@ -159,10 +159,9 @@ export function TierModal({ work, onUnlocked }: Props) {
         apiUrl: process.env.NEXT_PUBLIC_CDR_API_URL ?? "http://172.192.41.96:1317",
       });
 
-      const ipfsGateway = process.env.NEXT_PUBLIC_IPFS_GATEWAY_URL ?? "https://ipfs.io/ipfs";
       const storage = new GatewayProvider({
-        apiUrl:     ipfsGateway.replace(/\/ipfs\/?$/, ""),
-        gatewayUrl: ipfsGateway,
+        apiUrl:     "http://127.0.0.1:5001",
+        gatewayUrl: "http://127.0.0.1:8080/ipfs",
       });
 
       const vaultUuid = work.gatedVaultUuids[tierIndex];

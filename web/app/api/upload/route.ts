@@ -7,7 +7,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { CDRClient, initWasm, GatewayProvider } from "@piplabs/cdr-sdk";
-import { StoryClient } from "@story-protocol/core-sdk";
+import { StoryClient, PILFlavor, NativeRoyaltyPolicy } from "@story-protocol/core-sdk";
 
 // ── Chain ─────────────────────────────────────────────────────────────────────
 
@@ -105,10 +105,24 @@ export async function POST(req: NextRequest) {
     const spgResult = await storyClient.ipAsset.mintAndRegisterIpAssetWithPilTerms({
       spgNftContract:  (process.env.SPG_NFT_CONTRACT ?? "") as `0x${string}`,
       licenseTermsData: [
-        { terms: { transferable: true, royaltyPolicy: "0x0000000000000000000000000000000000000000", defaultMintingFee: parseEther(String(streamFee)),   expiration: BigInt(0), commercialUse: false, commercialAttribution: false, commercializerChecker: "0x0000000000000000000000000000000000000000", commercializerCheckerData: "0x", commercialRevShare: 0, commercialRevCeiling: BigInt(0), derivativesAllowed: true,  derivativesAttribution: true,  derivativesApproval: false, derivativesReciprocal: false, derivativeRevCeiling: BigInt(0), currency: ADDRESSES.WIP_TOKEN, uri: "" } },
-        { terms: { transferable: true, royaltyPolicy: "0x0000000000000000000000000000000000000000", defaultMintingFee: parseEther(String(downloadFee)), expiration: BigInt(0), commercialUse: false, commercialAttribution: false, commercializerChecker: "0x0000000000000000000000000000000000000000", commercializerCheckerData: "0x", commercialRevShare: 0, commercialRevCeiling: BigInt(0), derivativesAllowed: true,  derivativesAttribution: true,  derivativesApproval: false, derivativesReciprocal: false, derivativeRevCeiling: BigInt(0), currency: ADDRESSES.WIP_TOKEN, uri: "" } },
-        { terms: { transferable: true, royaltyPolicy: "0x0000000000000000000000000000000000000000", defaultMintingFee: parseEther(String(commFee)),     expiration: BigInt(0), commercialUse: true,  commercialAttribution: true,  commercializerChecker: "0x0000000000000000000000000000000000000000", commercializerCheckerData: "0x", commercialRevShare: 10, commercialRevCeiling: BigInt(0), derivativesAllowed: true,  derivativesAttribution: true,  derivativesApproval: false, derivativesReciprocal: true,  derivativeRevCeiling: BigInt(0), currency: ADDRESSES.WIP_TOKEN, uri: "" } },
+        { terms: PILFlavor.commercialUse({
+            defaultMintingFee: parseEther(String(streamFee)),
+            currency: ADDRESSES.WIP_TOKEN,
+            royaltyPolicy: NativeRoyaltyPolicy.LAP,
+          }) },
+        { terms: PILFlavor.commercialUse({
+            defaultMintingFee: parseEther(String(downloadFee)),
+            currency: ADDRESSES.WIP_TOKEN,
+            royaltyPolicy: NativeRoyaltyPolicy.LAP,
+          }) },
+        { terms: PILFlavor.commercialRemix({
+            defaultMintingFee: parseEther(String(commFee)),
+            currency: ADDRESSES.WIP_TOKEN,
+            royaltyPolicy: NativeRoyaltyPolicy.LAP,
+            commercialRevShare: 10,
+          }) },
       ],
+      allowDuplicates: true,
       ipMetadata: {
         ipMetadataURI:  "",
         ipMetadataHash: "0x0000000000000000000000000000000000000000000000000000000000000000",
