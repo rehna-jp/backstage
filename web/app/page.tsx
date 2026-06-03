@@ -38,18 +38,21 @@ async function fetchWorks(): Promise<{ id: number; work: Work; meta: WorkMeta | 
 
   const all = works.map((work, i) => ({ id: i, work }));
 
-  // Deduplicate: only keep the most recent registration per ipId
-  // (re-runs of publish-work register a new workId for the same IP)
-  const seen = new Set<string>();
-  const deduped = [...all].reverse().filter(({ work }) => {
-    const key = work.ipId.toLowerCase();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  // Newest-first, then deduplicate: one entry per (creator, ipId) pair,
+  // then one entry per creator — keeping only their most recent work.
+  const seenIp      = new Set<string>();
+  const seenCreator = new Set<string>();
 
-  // Only show works that have all 3 vaults (fully set up)
-  const valid = deduped.filter(({ work }) => work.gatedVaultUuids.length >= 2);
+  const valid = [...all].reverse()
+    .filter(({ work }) => {
+      const ip      = work.ipId.toLowerCase();
+      const creator = work.creator.toLowerCase();
+      if (seenIp.has(ip)) return false;
+      seenIp.add(ip);
+      if (seenCreator.has(creator)) return false;
+      seenCreator.add(creator);
+      return work.gatedVaultUuids.length >= 2;
+    });
 
   const results = await Promise.all(
     valid.map(async ({ id, work }) => {
