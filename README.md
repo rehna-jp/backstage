@@ -28,7 +28,7 @@ graph TD
     StoryIPAsset -->|attaches| LicenseTerms["License Terms\n(Stream / Download / Commercial)"]
     Creator -->|uploads| CDRVault1["CDR Vault 1\n(Full Track, stream-gated)"]
     Creator -->|uploads| CDRVault2["CDR Vault 2\n(Stems, commercial-gated)"]
-    CDRVault1 -->|readCondition| TieredCond["TieredLicenseReadCondition\n0x510334..."]
+    CDRVault1 -->|readCondition| TieredCond["TieredLicenseReadCondition\n0xD0ee5F..."]
     CDRVault2 -->|readCondition| TieredCond
     TieredCond -->|checks| LicenseToken["LicenseToken\n0xFe3838..."]
     Buyer -->|pays WIP| RoyaltyModule["RoyaltyModule\n0xD2f60c..."]
@@ -38,7 +38,7 @@ graph TD
     AESKey -->|decrypts| EncryptedFile[Encrypted file on IPFS]
     EncryptedFile -->|plays in browser| AudioPlayer
     BackstageRegistry["BackstageRegistry\n0x58023f..."] -->|indexes| StoryIPAsset
-    TimeWindowed["TimeWindowedReadCondition\n0x11ce1f..."] -->|delegates to| TieredCond
+    TimeWindowed["TimeWindowedReadCondition\n0x48924A..."] -->|delegates to| TieredCond
     SubscriptionNFT -->|early access check| TimeWindowed
 ```
 
@@ -61,7 +61,7 @@ function checkReadCondition(
 
 **Why this matters:** A creator can put three tiers on one IP Asset and allocate three separate CDR vaults — each vault gets a different `requiredTermsId` in its `conditionData`. A buyer with a Stream license can't unlock the Commercial vault. One stateless contract handles all tier combinations for all IP Assets on the network.
 
-Deployed on Aeneid: [`0x510334451a122b94B7A424523C931d2c61b7d6Bc`](https://aeneid.storyscan.xyz/address/0x510334451a122b94b7a424523c931d2c61b7d6bc)
+Deployed on Aeneid: [`0xD0ee5Fafff3495100Ca9Df3c4066b94B62F2BF9F`](https://aeneid.storyscan.xyz/address/0xD0ee5Fafff3495100Ca9Df3c4066b94B62F2BF9F)
 
 ### `TimeWindowedReadCondition`
 
@@ -72,13 +72,13 @@ Layers time-gated access windows on top of any inner `ICDRReadCondition`. Two wi
 
 The inner condition is called by delegation, so time gates compose with tier gates without code duplication.
 
-Deployed on Aeneid: [`0x11ce1f1612180aD8453baE18631f36eE1884C04B`](https://aeneid.storyscan.xyz/address/0x11ce1f1612180ad8453bae18631f36ee1884c04b)
+Deployed on Aeneid: [`0x48924A441077f3B03507dB17f35cAd3468756e39`](https://aeneid.storyscan.xyz/address/0x48924A441077f3B03507dB17f35cAd3468756e39)
 
 ### `BackstageRegistry`
 
 Catalog contract that links Story IP Assets to CDR vault UUIDs, license terms IDs, and metadata. Emits indexable events for the discovery page.
 
-Deployed on Aeneid: [`0x58023f46a8D1EaC017f07b0A74a5425A613c2f4D`](https://aeneid.storyscan.xyz/address/0x58023f46a8d1eac017f07b0a74a5425a613c2f4d)
+Deployed on Aeneid: [`0x5d872b5fe7334577d15acbd7e62dd954930ec85d`](https://aeneid.storyscan.xyz/address/0x5d872b5fe7334577d15acbd7e62dd954930ec85d)
 
 ---
 
@@ -102,10 +102,10 @@ CDR handles content encryption, threshold decryption, and access enforcement. St
 
 | Contract | Address |
 |---|---|
-| TieredLicenseReadCondition | `0x510334451a122b94B7A424523C931d2c61b7d6Bc` |
-| TimeWindowedReadCondition | `0x11ce1f1612180aD8453baE18631f36eE1884C04B` |
-| BackstageRegistry | `0x58023f46a8D1EaC017f07b0A74a5425A613c2f4D` |
-| SubscriptionNFT (demo) | `0x35bd9226Da9b700ad5559e8483f1f1F4Ce7560d9` |
+| TieredLicenseReadCondition | `0xD0ee5Fafff3495100Ca9Df3c4066b94B62F2BF9F` |
+| TimeWindowedReadCondition | `0x48924A441077f3B03507dB17f35cAd3468756e39` |
+| BackstageRegistry | `0x5d872b5fe7334577d15acbd7e62dd954930ec85d` |
+| SubscriptionNFT (demo) | `0xe869345337e1cec4a84de62da356259c262cb3b5` |
 | LicenseToken (Story) | `0xFe3838BFb30B34170F00030B52eA4893d8aAC6bC` |
 | RoyaltyModule (Story) | `0xD2f60c40fEbccf6311f8B47c4f2Ec6b040400086` |
 
