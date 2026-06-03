@@ -78,7 +78,7 @@ Deployed on Aeneid: [`0x48924A441077f3B03507dB17f35cAd3468756e39`](https://aenei
 
 Catalog contract that links Story IP Assets to CDR vault UUIDs, license terms IDs, and metadata. Emits indexable events for the discovery page.
 
-Deployed on Aeneid: [`0x5d872b5fe7334577d15acbd7e62dd954930ec85d`](https://aeneid.storyscan.xyz/address/0x5d872b5fe7334577d15acbd7e62dd954930ec85d)
+Deployed on Aeneid: [`0x58023f46a8D1EaC017f07b0A74a5425A613c2f4D`](https://aeneid.storyscan.xyz/address/0x58023f46a8d1eac017f07b0a74a5425a613c2f4d)
 
 ---
 
@@ -104,8 +104,8 @@ CDR handles content encryption, threshold decryption, and access enforcement. St
 |---|---|
 | TieredLicenseReadCondition | `0xD0ee5Fafff3495100Ca9Df3c4066b94B62F2BF9F` |
 | TimeWindowedReadCondition | `0x48924A441077f3B03507dB17f35cAd3468756e39` |
-| BackstageRegistry | `0x5d872b5fe7334577d15acbd7e62dd954930ec85d` |
-| SubscriptionNFT (demo) | `0xe869345337e1cec4a84de62da356259c262cb3b5` |
+| BackstageRegistry | `0x58023f46a8D1EaC017f07b0A74a5425A613c2f4D` |
+| SubscriptionNFT (demo) | `0x35bd9226Da9b700ad5559e8483f1f1F4Ce7560d9` |
 | LicenseToken (Story) | `0xFe3838BFb30B34170F00030B52eA4893d8aAC6bC` |
 | RoyaltyModule (Story) | `0xD2f60c40fEbccf6311f8B47c4f2Ec6b040400086` |
 
