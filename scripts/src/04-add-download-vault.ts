@@ -25,7 +25,8 @@ import {
   http, defineChain,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { CDRClient, initWasm, GatewayProvider } from "@piplabs/cdr-sdk";
+import { CDRClient, initWasm } from "@piplabs/cdr-sdk";
+import { RawIPFSProvider } from "./rawIPFSProvider.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -124,7 +125,7 @@ async function main() {
 
   log("Wallet", `creator = ${account.address}`);
 
-  const storage = new GatewayProvider({ apiUrl: IPFS_API_URL, gatewayUrl: IPFS_GW_URL });
+  const storage = new RawIPFSProvider({ apiUrl: IPFS_API_URL, gatewayUrl: IPFS_GW_URL });
 
   const globalPubKey = await cdrClient.observer.getGlobalPubKey();
   log("CDR", "DKG global public key fetched");

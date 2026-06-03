@@ -24,7 +24,8 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { StoryClient, PILFlavor, NativeRoyaltyPolicy } from "@story-protocol/core-sdk";
-import { CDRClient, initWasm, GatewayProvider } from "@piplabs/cdr-sdk";
+import { CDRClient, initWasm } from "@piplabs/cdr-sdk";
+import { RawIPFSProvider } from "./rawIPFSProvider.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -186,7 +187,7 @@ async function main() {
   // ── Step 3: Preview → plain IPFS (local daemon) ───────────────────────────
   stepHdr(3, "Upload preview to plain IPFS");
 
-  const storage = new GatewayProvider({ apiUrl: IPFS_API_URL, gatewayUrl: IPFS_GW_URL });
+  const storage = new RawIPFSProvider({ apiUrl: IPFS_API_URL, gatewayUrl: IPFS_GW_URL });
 
   const trackBytes = new Uint8Array(readFileSync(resolve(__dirname, "../assets/track.mp3")));
   const stemsBytes = new Uint8Array(readFileSync(resolve(__dirname, "../assets/stems.mp3")));
