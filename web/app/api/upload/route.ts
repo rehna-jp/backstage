@@ -6,8 +6,9 @@ import {
   encodeAbiParameters, parseEther, defineChain,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { CDRClient, initWasm, GatewayProvider } from "@piplabs/cdr-sdk";
+import { CDRClient, initWasm } from "@piplabs/cdr-sdk";
 import { StoryClient, PILFlavor, NativeRoyaltyPolicy } from "@story-protocol/core-sdk";
+import { RawIPFSProvider } from "@/lib/rawIPFSProvider";
 
 // ── Chain ─────────────────────────────────────────────────────────────────────
 
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     const ipfsApiUrl = process.env.IPFS_API_URL     ?? "http://127.0.0.1:5001";
     const ipfsGwUrl  = process.env.IPFS_GATEWAY_URL ?? "http://127.0.0.1:8080/ipfs";
-    const storage = new GatewayProvider({ apiUrl: ipfsApiUrl, gatewayUrl: ipfsGwUrl });
+    const storage = new RawIPFSProvider({ apiUrl: ipfsApiUrl, gatewayUrl: ipfsGwUrl });
 
     // ── Step 1: Register IP Asset ─────────────────────────────────────────────
     log("IP", "minting IP Asset…");
