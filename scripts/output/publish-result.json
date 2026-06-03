@@ -1,13 +1,21 @@
 {
-  "ipId": "0x43d1d859A557ddA70A3FB4a6e2ad50d6fFB6CBA1",
+  "ipId": "0x50F3046A449A79Ba3513dAAb2786b172331EF0bC",
   "collectionAddr": "0x7C5f0C9EFE69EE74A35332ad2F686ef50274E276",
   "streamTermsId": "1912",
   "downloadTermsId": "2835",
   "commercialTermsId": "2460",
-  "fullTrackUuid": 5300,
-  "fullTrackCid": "bafybeifyoy4trfizurnntjxucwyjttzt5upplaedmn62qkeskzz2iwblfm",
-  "stemsUuid": 5301,
-  "stemsCid": "bafybeicwpglxeq3l3xhkuil6ocpmra7ga3u46b5dfjkuhmcz4tvkkfxkzm",
-  "previewCid": "bafkreif6ugii4nal54msbvdiu3tgq2ondfv6r35sf5johnunt7oi4vvbsy",
-  "createdAt": "2026-06-02T14:16:08.833Z"
+  "fullTrackUuid": 5961,
+  "fullTrackCid": "Qmc2MsdRkZevKnAE385GD5MrPpNBRsc8pN19AyVjDdfoFf",
+  "stemsUuid": 5962,
+  "stemsCid": "QmRejwd9p6c19QTrQdUDKgHk8Ap33yDiyXpGZNJQMGYeUS",
+  "previewCid": "Qmemz1DdC4yFUgUetQEeQMZBQQoyLrSDLMYQsn7dhKT6JH",
+  "createdAt": "2026-06-03T18:22:29.560Z",
+  "workId": 5,
+  "downloadVaultUuid": 5964,
+  "downloadVaultCid": "QmYThhhV9Lp6ZX4eigSwh9p8w3c3g4rNK92dedWohnanPe",
+  "vaultOrder": [
+    "fullTrack (stream-gated)",
+    "fullTrack (download-gated)",
+    "stems (commercial-gated)"
+  ]
 }

@@ -11,7 +11,10 @@
 //
 // Run: pnpm publish-work   (Node 22+ required — nvm use 22)
 
-import "dotenv/config";
+import { config } from "dotenv";
+import { resolve as _r, dirname as _d } from "node:path";
+import { fileURLToPath as _f } from "node:url";
+config({ path: _r(_d(_f(import.meta.url)), "../../.env") });
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,10 +24,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { StoryClient, PILFlavor, NativeRoyaltyPolicy } from "@story-protocol/core-sdk";
-import { CDRClient, initWasm, HeliaProvider } from "@piplabs/cdr-sdk";
-import { createHelia } from "helia";
-import { unixfs } from "@helia/unixfs";
-import { CID } from "multiformats/cid";
+import { CDRClient, initWasm, GatewayProvider } from "@piplabs/cdr-sdk";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -50,13 +50,15 @@ function stepHdr(n: number, msg: string) {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const RPC_URL  = process.env.AENEID_RPC_URL ?? "https://aeneid.storyrpc.io";
-const API_URL  = process.env.STORY_API_URL  ?? "http://172.192.41.96:1317";
-const EXPLORER = "https://aeneid.storyscan.xyz";
+const RPC_URL      = process.env.AENEID_RPC_URL   ?? "https://aeneid.storyrpc.io";
+const API_URL      = process.env.STORY_API_URL    ?? "http://172.192.41.96:1317";
+const IPFS_API_URL = process.env.IPFS_API_URL     ?? "http://127.0.0.1:5001";
+const IPFS_GW_URL  = process.env.IPFS_GATEWAY_URL ?? "http://127.0.0.1:8080/ipfs";
+const EXPLORER     = "https://aeneid.storyscan.xyz";
 
 const PK               = requireEnv("WALLET_PRIVATE_KEY");
-const TIERED_READ_COND = requireEnv("TIERED_LICENSE_READ_CONDITION") as `0x${string}`;
-const REGISTRY_ADDR    = requireEnv("BACKSTAGE_REGISTRY")            as `0x${string}`;
+const TIERED_READ_COND = (process.env.TIERED_LICENSE_READ_CONDITION ?? process.env.NEXT_PUBLIC_TIERED_LICENSE_READ_CONDITION ?? requireEnv("TIERED_LICENSE_READ_CONDITION")) as `0x${string}`;
+const REGISTRY_ADDR    = (process.env.BACKSTAGE_REGISTRY            ?? process.env.NEXT_PUBLIC_BACKSTAGE_REGISTRY            ?? requireEnv("BACKSTAGE_REGISTRY"))            as `0x${string}`;
 
 // Aeneid — addresses sourced from storyprotocol/sdk generated.ts
 const WIP_TOKEN        = "0x1514000000000000000000000000000000000000" as `0x${string}`;
@@ -181,22 +183,19 @@ async function main() {
   log("IP Asset",  `ipId = ${ipId}`, regResult.txHash);
   log("PIL Terms", `stream=${streamId}  download=${downloadId}  commercial=${commercialId}`);
 
-  // ── Step 3: Preview → plain IPFS (Helia) ──────────────────────────────────
+  // ── Step 3: Preview → plain IPFS (local daemon) ───────────────────────────
   stepHdr(3, "Upload preview to plain IPFS");
 
-  console.log("  Starting Helia node…");
-  const helia     = await createHelia();
-  const heliaFS   = unixfs(helia);
+  const storage = new GatewayProvider({ apiUrl: IPFS_API_URL, gatewayUrl: IPFS_GW_URL });
+
   const trackBytes = new Uint8Array(readFileSync(resolve(__dirname, "../assets/track.mp3")));
   const stemsBytes = new Uint8Array(readFileSync(resolve(__dirname, "../assets/stems.mp3")));
 
   // Preview = first 30s ≈ first 480 KB at 128 kbps
   const previewBytes = trackBytes.slice(0, Math.min(trackBytes.length, 480_000));
-  const previewCidObj = await heliaFS.addBytes(previewBytes);
-  const previewCid    = String(previewCidObj);
-  log("Preview", `CID=${previewCid}  (${(previewBytes.length / 1024).toFixed(0)} KB, plain IPFS)`);
+  const previewCid = await storage.upload(previewBytes, { pin: true });
+  log("Preview", `CID=${previewCid}  (${(previewBytes.length / 1024).toFixed(0)} KB, local IPFS)`);
 
-  const storage = new HeliaProvider({ helia, unixfs: heliaFS, CID: (s) => CID.parse(s) });
   const globalPubKey = await cdrClient.observer.getGlobalPubKey();
   log("CDR", "DKG global public key fetched");
 
@@ -261,8 +260,6 @@ async function main() {
   });
   await publicClient.waitForTransactionReceipt({ hash: regTxHash });
   log("Registry", `work registered`, regTxHash);
-
-  await helia.stop();
 
   // ── Step 7: Write output ──────────────────────��───────────────────────────
   mkdirSync(resolve(__dirname, "../output"), { recursive: true });

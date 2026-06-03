@@ -9,7 +9,8 @@
   "scripts": {
     "publish-work": "tsx src/01-publish-work.ts",
     "buy-unlock": "tsx src/02-buy-and-unlock.ts",
-    "time-locked-drop": "tsx src/03-time-locked-drop.ts"
+    "time-locked-drop": "tsx src/03-time-locked-drop.ts",
+    "add-download-vault": "tsx src/04-add-download-vault.ts"
   },
   "dependencies": {
     "@helia/unixfs": "^4.0.0",

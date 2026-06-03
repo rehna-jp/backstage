@@ -1,4 +1,3 @@
-// Force Node.js runtime — Helia and CDR SDK require it.
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -7,11 +6,8 @@ import {
   encodeAbiParameters, parseEther, defineChain,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { CDRClient, initWasm, HeliaProvider } from "@piplabs/cdr-sdk";
+import { CDRClient, initWasm, GatewayProvider } from "@piplabs/cdr-sdk";
 import { StoryClient } from "@story-protocol/core-sdk";
-import { createHelia } from "helia";
-import { unixfs } from "@helia/unixfs";
-import { CID } from "multiformats/cid";
 
 // ── Chain ─────────────────────────────────────────────────────────────────────
 
@@ -100,9 +96,9 @@ export async function POST(req: NextRequest) {
       apiUrl: process.env.NEXT_PUBLIC_CDR_API_URL ?? "http://172.192.41.96:1317",
     });
 
-    const helia   = await createHelia();
-    const heliaFS = unixfs(helia);
-    const storage = new HeliaProvider({ helia, unixfs: heliaFS, CID: (str: string) => CID.parse(str) });
+    const ipfsApiUrl = process.env.IPFS_API_URL     ?? "http://127.0.0.1:5001";
+    const ipfsGwUrl  = process.env.IPFS_GATEWAY_URL ?? "http://127.0.0.1:8080/ipfs";
+    const storage = new GatewayProvider({ apiUrl: ipfsApiUrl, gatewayUrl: ipfsGwUrl });
 
     // ── Step 1: Register IP Asset ─────────────────────────────────────────────
     log("IP", "minting IP Asset…");
@@ -128,11 +124,7 @@ export async function POST(req: NextRequest) {
     // ── Step 2: Upload preview to plain IPFS ─────────────────────────────────
     const PREVIEW_BYTES = 480 * 1024;
     const previewBytes  = audioBytes.slice(0, Math.min(PREVIEW_BYTES, audioBytes.length));
-    const heliaFSNode   = unixfs(helia);
-    let previewCid      = "";
-    for await (const cid of heliaFSNode.addAll([{ path: "preview.mp3", content: previewBytes }])) {
-      previewCid = cid.cid.toString();
-    }
+    const previewCid    = await storage.upload(previewBytes, { pin: true });
     log("Preview", `CID=${previewCid}`);
 
     // ── Step 3: Upload full track CDR vault (stream-gated) ────────────────────
@@ -172,11 +164,9 @@ export async function POST(req: NextRequest) {
     log("CDR Stems", `uuid=${stemsUuid}`);
 
     // ── Step 5: Upload metadata to IPFS ──────────────────────────────────────
-    const metadata = JSON.stringify({ title, description, image: "" });
-    let metadataURI = "";
-    for await (const entry of heliaFSNode.addAll([{ path: "metadata.json", content: new TextEncoder().encode(metadata) }])) {
-      metadataURI = `ipfs://${entry.cid.toString()}`;
-    }
+    const metadata    = JSON.stringify({ title, description, image: "" });
+    const metadataCid = await storage.upload(new TextEncoder().encode(metadata), { pin: true });
+    const metadataURI = `ipfs://${metadataCid}`;
     log("Metadata", `URI=${metadataURI}`);
 
     // ── Step 6: Register in BackstageRegistry ────────────────────────────────
@@ -204,8 +194,6 @@ export async function POST(req: NextRequest) {
       workId = Number(BigInt(workIdLog.topics[1]));
     }
     log("Registry", `workId=${workId}`);
-
-    await helia.stop();
 
     return NextResponse.json({
       workId,

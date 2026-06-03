@@ -1,27 +1,30 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Typography */
   --font-sans: var(--font-inter);
   --font-display: var(--font-space-grotesk);
 
-  /* Backstage palette — deep black with purple accent */
-  --color-background: #09090b;
-  --color-surface: #18181b;
-  --color-surface-2: #27272a;
-  --color-border: #3f3f46;
+  /* Backstage — navy-black with electric blue */
+  --color-background:   #08080f;
+  --color-surface:      #0f0f1a;
+  --color-surface-2:    #181828;
+  --color-surface-3:    #1e1e30;
+  --color-border:       #252538;
+  --color-border-subtle:#1a1a2a;
 
-  --color-text-primary: #fafafa;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717a;
+  --color-text-primary:   #eeeeff;
+  --color-text-secondary: #8888bb;
+  --color-text-muted:     #55556a;
 
-  --color-accent: #a855f7;      /* purple-500 */
-  --color-accent-dim: #7c3aed;  /* purple-700 */
-  --color-accent-glow: rgb(168 85 247 / 0.15);
+  --color-accent:       #3b82f6;
+  --color-accent-dim:   #2563eb;
+  --color-accent-bright:#60a5fa;
+  --color-accent-glow:  rgb(59 130 246 / 0.12);
+  --color-accent-glow2: rgb(59 130 246 / 0.06);
 
-  --color-green: #22c55e;
-  --color-amber: #f59e0b;
-  --color-red: #ef4444;
+  --color-green:  #22c55e;
+  --color-amber:  #f59e0b;
+  --color-red:    #ef4444;
 }
 
 * {
@@ -40,23 +43,32 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Display / heading font */
 h1, h2, h3, .font-display {
   font-family: var(--font-space-grotesk), system-ui, sans-serif;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* Focus ring */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
-/* Smooth transitions for interactive elements */
-button, a, input, select {
-  transition: opacity 0.15s, background-color 0.15s, border-color 0.15s;
+button, a, input, select, textarea {
+  transition: opacity 0.15s, background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+/* Blue glow utility */
+.glow-blue {
+  box-shadow: 0 0 24px rgb(59 130 246 / 0.18), 0 0 48px rgb(59 130 246 / 0.08);
+}
+
+/* Gradient border card */
+.card-gradient-border {
+  background: linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+              linear-gradient(135deg, rgb(59 130 246 / 0.4), transparent 50%, rgb(59 130 246 / 0.1)) border-box;
+  border: 1px solid transparent;
 }

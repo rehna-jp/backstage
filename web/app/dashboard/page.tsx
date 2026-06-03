@@ -11,16 +11,21 @@ import { shortenAddress } from "@/lib/utils";
 import Image from "next/image";
 
 const TIER_COLORS = [
-  "text-[--color-accent] bg-[--color-accent-glow]",
-  "text-[--color-amber] bg-amber-500/10",
-  "text-[--color-green] bg-green-500/10",
+  "text-[--color-accent] bg-[--color-accent-glow] border-[--color-accent]/20",
+  "text-[--color-amber] bg-amber-500/10 border-amber-500/20",
+  "text-[--color-green] bg-green-500/10 border-green-500/20",
 ] as const;
 
-function StatCard({ label, value }: { label: string; value: number | string }) {
+function StatCard({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-[--color-border] bg-[--color-surface] px-5 py-4">
-      <p className="text-xs uppercase tracking-widest text-[--color-text-muted]">{label}</p>
-      <p className="mt-1 text-3xl font-bold text-[--color-text-primary]" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+    <div className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5">
+      <div className="flex items-start justify-between mb-3">
+        <p className="text-xs font-medium uppercase tracking-[0.1em] text-[--color-text-muted]">{label}</p>
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[--color-surface-2] text-[--color-text-muted]">
+          {icon}
+        </div>
+      </div>
+      <p className="text-4xl font-bold text-[--color-text-primary]" style={{ fontFamily: "var(--font-space-grotesk)" }}>
         {value}
       </p>
     </div>
@@ -78,15 +83,21 @@ export default function DashboardPage() {
 
   const totalVaults = works.reduce((s, { work }) => s + work.gatedVaultUuids.length, 0);
   const totalTiers  = works.reduce((s, { work }) => s + work.licenseTermsIds.length, 0);
-
   const isLoading = loadingIds || (workContracts.length > 0 && loadingWorks);
 
   if (!isConnected) {
     return (
       <>
         <NavBar />
-        <main className="mx-auto max-w-2xl px-6 py-24 text-center space-y-6">
-          <h1 className="text-3xl font-bold text-[--color-text-primary]">Creator Dashboard</h1>
+        <main className="mx-auto max-w-lg px-6 py-32 text-center space-y-6">
+          <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-[--color-surface-2]">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[--color-text-muted]">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-[--color-text-primary]" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+            Creator Dashboard
+          </h1>
           <p className="text-[--color-text-secondary]">
             Connect your wallet to see the works you've published on Backstage.
           </p>
@@ -106,128 +117,147 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold text-[--color-text-primary]">Your Dashboard</h1>
-            <p className="mt-1 text-sm text-[--color-text-muted] font-mono">{address}</p>
+            <h1 className="text-3xl font-bold text-[--color-text-primary]" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+              Dashboard
+            </h1>
+            <p className="mt-1.5 text-sm font-mono text-[--color-text-muted]">{address}</p>
           </div>
-          <Link
-            href="/"
-            className="rounded-lg border border-[--color-border] px-4 py-2 text-sm text-[--color-text-secondary] hover:text-[--color-text-primary] hover:border-[--color-accent]/50 transition-colors"
-          >
-            Browse Marketplace ↗
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="rounded-xl border border-[--color-border] px-4 py-2 text-sm text-[--color-text-secondary] hover:text-[--color-text-primary] hover:border-[--color-accent]/30 transition-all"
+            >
+              Marketplace ↗
+            </Link>
+            <Link
+              href="/upload"
+              className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all"
+              style={{ background: "linear-gradient(135deg, #3b82f6, #2563eb)", boxShadow: "0 0 16px rgb(59 130 246 / 0.25)" }}
+            >
+              + Publish
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 sm:gap-6">
-          <StatCard label="Works Published" value={isLoading ? "—" : works.length} />
-          <StatCard label="CDR Vaults"      value={isLoading ? "—" : totalVaults} />
-          <StatCard label="License Tiers"   value={isLoading ? "—" : totalTiers} />
+        <div className="grid grid-cols-3 gap-4">
+          <StatCard
+            label="Works Published"
+            value={isLoading ? "—" : works.length}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>}
+          />
+          <StatCard
+            label="CDR Vaults"
+            value={isLoading ? "—" : totalVaults}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
+          />
+          <StatCard
+            label="License Tiers"
+            value={isLoading ? "—" : totalTiers}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>}
+          />
         </div>
 
         {/* Works list */}
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 animate-pulse rounded-xl bg-[--color-surface]" />
-            ))}
-          </div>
-        ) : works.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[--color-border] py-24 text-center">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-4 text-[--color-text-muted]">
-              <path d="M9 18V5l12-2v13" />
-              <circle cx="6" cy="18" r="3" />
-              <circle cx="18" cy="16" r="3" />
-            </svg>
-            <p className="text-[--color-text-secondary]">No works published yet.</p>
-            <p className="mt-1 text-sm text-[--color-text-muted]">
-              Run <code className="font-mono text-xs">pnpm publish-work</code> from the scripts package.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {works.map(({ id, work }) => {
-              const title = titles[id] || `Work #${id}`;
-              const cover = covers[id] ?? null;
-              const createdDate = new Date(Number(work.createdAt) * 1000).toLocaleDateString("en-US", {
-                month: "short", day: "numeric", year: "numeric",
-              });
+        <div>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.1em] text-[--color-text-muted]">Your Works</h2>
 
-              return (
-                <div
-                  key={id}
-                  className="group flex items-center gap-5 rounded-xl border border-[--color-border] bg-[--color-surface] p-4 hover:border-[--color-accent]/40 transition-colors"
-                >
-                  {/* Cover */}
-                  <div className="relative shrink-0 h-14 w-14 overflow-hidden rounded-lg bg-[--color-surface-2]">
-                    {cover ? (
-                      <Image src={cover} alt={title} fill className="object-cover" unoptimized />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[--color-text-muted]">
-                          <path d="M9 18V5l12-2v13" />
-                          <circle cx="6" cy="18" r="3" />
-                          <circle cx="18" cy="16" r="3" />
-                        </svg>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 animate-pulse rounded-2xl bg-[--color-surface]" />
+              ))}
+            </div>
+          ) : works.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[--color-border] py-24 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[--color-surface-2] mb-4">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[--color-text-muted]">
+                  <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
+                </svg>
+              </div>
+              <p className="font-semibold text-[--color-text-secondary]">No works published yet.</p>
+              <p className="mt-1 text-sm text-[--color-text-muted]">
+                Run <code className="font-mono text-xs bg-[--color-surface-2] px-1.5 py-0.5 rounded">pnpm publish-work</code> to get started.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {works.map(({ id, work }) => {
+                const title = titles[id] || `Work #${id}`;
+                const cover = covers[id] ?? null;
+                const createdDate = new Date(Number(work.createdAt) * 1000).toLocaleDateString("en-US", {
+                  month: "short", day: "numeric", year: "numeric",
+                });
+
+                return (
+                  <div
+                    key={id}
+                    className="group flex items-center gap-5 rounded-2xl border border-[--color-border] bg-[--color-surface] p-4 hover:border-[--color-accent]/30 hover:bg-[--color-surface-2] transition-all"
+                  >
+                    <div className="relative shrink-0 h-14 w-14 overflow-hidden rounded-xl bg-[--color-surface-2]">
+                      {cover ? (
+                        <Image src={cover} alt={title} fill className="object-cover" unoptimized />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[--color-text-muted]">
+                            <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/works/${id}`}
+                          className="font-semibold text-sm text-[--color-text-primary] hover:text-[--color-accent] truncate transition-colors"
+                          style={{ fontFamily: "var(--font-space-grotesk)" }}
+                        >
+                          {title}
+                        </Link>
+                        <span className="shrink-0 rounded-full bg-[--color-surface-3] border border-[--color-border] px-2 py-0.5 text-[10px] font-mono text-[--color-text-muted]">
+                          #{id}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-3 flex-wrap text-xs text-[--color-text-muted]">
+                        <span>{createdDate}</span>
+                        <a
+                          href={`https://aeneid.storyscan.xyz/address/${work.ipId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono hover:text-[--color-accent] transition-colors"
+                        >
+                          {shortenAddress(work.ipId)} ↗
+                        </a>
+                        <span>{work.gatedVaultUuids.length} vault{work.gatedVaultUuids.length !== 1 ? "s" : ""}</span>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 flex items-center gap-1.5 flex-wrap justify-end">
+                      {work.licenseTermsIds.map((_, i) => (
+                        <span
+                          key={i}
+                          className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${TIER_COLORS[i] ?? "text-[--color-text-muted] bg-[--color-surface-2] border-[--color-border]"}`}
+                        >
+                          {TIER_LABELS[i] ?? `Tier ${i}`}
+                        </span>
+                      ))}
+                    </div>
+
+                    {work.gatedVaultUuids.length > 0 && (
+                      <div className="shrink-0 hidden lg:block text-right">
+                        <p className="text-[10px] text-[--color-text-muted] mb-1 uppercase tracking-wider">CDR Vault{work.gatedVaultUuids.length > 1 ? "s" : ""}</p>
+                        {work.gatedVaultUuids.map((uuid) => (
+                          <p key={uuid} className="font-mono text-xs text-[--color-text-secondary]">#{uuid}</p>
+                        ))}
                       </div>
                     )}
                   </div>
-
-                  {/* Title + meta */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Link
-                        href={`/works/${id}`}
-                        className="font-semibold text-[--color-text-primary] hover:text-[--color-accent] truncate transition-colors"
-                        style={{ fontFamily: "var(--font-space-grotesk)" }}
-                      >
-                        {title}
-                      </Link>
-                      <span className="shrink-0 rounded-full bg-[--color-surface-2] px-2 py-0.5 text-xs text-[--color-text-muted]">
-                        #{id}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex items-center gap-3 flex-wrap text-xs text-[--color-text-muted]">
-                      <span>{createdDate}</span>
-                      <a
-                        href={`https://aeneid.storyscan.xyz/address/${work.ipId}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-mono hover:text-[--color-accent] transition-colors"
-                      >
-                        IP: {shortenAddress(work.ipId)} ↗
-                      </a>
-                      <span>{work.gatedVaultUuids.length} vault{work.gatedVaultUuids.length !== 1 ? "s" : ""}</span>
-                    </div>
-                  </div>
-
-                  {/* Tier badges */}
-                  <div className="shrink-0 flex items-center gap-1.5 flex-wrap justify-end">
-                    {work.licenseTermsIds.map((termsId, i) => (
-                      <span
-                        key={i}
-                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${TIER_COLORS[i] ?? "text-[--color-text-muted] bg-[--color-surface-2]"}`}
-                      >
-                        {TIER_LABELS[i] ?? `Tier ${i}`}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Vault UUIDs */}
-                  {work.gatedVaultUuids.length > 0 && (
-                    <div className="shrink-0 hidden lg:block text-right">
-                      <p className="text-xs text-[--color-text-muted] mb-0.5">CDR Vault{work.gatedVaultUuids.length > 1 ? "s" : ""}</p>
-                      {work.gatedVaultUuids.map((uuid) => (
-                        <p key={uuid} className="font-mono text-xs text-[--color-text-secondary]">
-                          #{uuid}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </main>
     </>
   );

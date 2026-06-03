@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import { useAccount, usePublicClient, useReadContract, useWriteContract } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import Link from "next/link";
@@ -46,8 +46,9 @@ const SUBSCRIPTION_NFT_ABI = [
   },
 ] as const;
 
-export default function SubscribePage({ params }: { params: { creator: string } }) {
-  const creatorAddress = params.creator as `0x${string}`;
+export default function SubscribePage({ params }: { params: Promise<{ creator: string }> }) {
+  const { creator } = use(params);
+  const creatorAddress = creator as `0x${string}`;
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();
   const { writeContractAsync } = useWriteContract();
