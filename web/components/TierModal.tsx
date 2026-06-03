@@ -152,12 +152,17 @@ export function TierModal({ work, onUnlocked }: Props) {
         [[licenseTokenId]],
       );
 
+      // Use the same-origin proxy so the browser (on HTTPS) can reach the HTTP CDR API
+      const cdrApiUrl = typeof window !== "undefined"
+        ? `${window.location.origin}/api/cdr`
+        : (process.env.NEXT_PUBLIC_CDR_API_URL ?? "http://172.192.41.96:1317");
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const cdrClient = new CDRClient({
         network: "testnet",
         publicClient: publicClient as any,
         walletClient: walletClient as any,
-        apiUrl: process.env.NEXT_PUBLIC_CDR_API_URL ?? "http://172.192.41.96:1317",
+        apiUrl: cdrApiUrl,
       });
 
       const ipfsGateway = process.env.NEXT_PUBLIC_IPFS_GATEWAY_URL ?? "http://127.0.0.1:8080/ipfs";
