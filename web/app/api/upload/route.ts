@@ -131,10 +131,11 @@ export async function POST(req: NextRequest) {
         nftMetadataHash: "0x0000000000000000000000000000000000000000000000000000000000000000",
       },
     });
-    const ipId          = spgResult.ipId as `0x${string}`;
-    const streamTermsId = spgResult.licenseTermsIds![0];
-    const commTermsId   = spgResult.licenseTermsIds![2];
-    log("IP", `registered ipId=${ipId}, terms=[${streamTermsId},${spgResult.licenseTermsIds![1]},${commTermsId}]`);
+    const ipId             = spgResult.ipId as `0x${string}`;
+    const [streamTermsId, downloadTermsId, commTermsId] = spgResult.licenseTermsIds!;
+    log("IP", `registered ipId=${ipId}, terms=[${streamTermsId},${downloadTermsId},${commTermsId}]`);
+
+    const creatorCondData = encodeAbiParameters([{ type: "address" }], [account.address]);
 
     // ── Step 2: Upload preview to plain IPFS ─────────────────────────────────
     const PREVIEW_BYTES = 480 * 1024;
@@ -142,49 +143,61 @@ export async function POST(req: NextRequest) {
     const previewCid    = await storage.upload(previewBytes, { pin: true });
     log("Preview", `CID=${previewCid}`);
 
-    // ── Step 3: Upload full track CDR vault (stream-gated) ────────────────────
-    const streamCondData = encodeAbiParameters(
-      [{ type: "address" }, { type: "address" }, { type: "uint256" }],
-      [ADDRESSES.LICENSE_TOKEN, ipId, streamTermsId],
-    );
-    const creatorCondData = encodeAbiParameters([{ type: "address" }], [account.address]);
-
-    const { uuid: fullUuid } = await cdrClient.uploader.uploadFile({
+    // ── Step 3: Stream vault (full track, stream-gated) ───────────────────────
+    const { uuid: streamUuid } = await cdrClient.uploader.uploadFile({
       content:            audioBytes,
       storageProvider:    storage,
       updatable:          false,
       writeConditionAddr: ADDRESSES.OWNER_WRITE_COND,
       writeConditionData: creatorCondData,
       readConditionAddr:  ADDRESSES.TIERED_READ_COND,
-      readConditionData:  streamCondData,
-      accessAuxData:      "0x",
+      readConditionData:  encodeAbiParameters(
+        [{ type: "address" }, { type: "address" }, { type: "uint256" }],
+        [ADDRESSES.LICENSE_TOKEN, ipId, streamTermsId],
+      ),
+      accessAuxData: "0x",
     });
-    log("CDR Full", `uuid=${fullUuid}`);
+    log("CDR Stream", `uuid=${streamUuid}`);
 
-    // ── Step 4: Upload stems CDR vault (commercial-gated) ─────────────────────
-    const commCondData = encodeAbiParameters(
-      [{ type: "address" }, { type: "address" }, { type: "uint256" }],
-      [ADDRESSES.LICENSE_TOKEN, ipId, commTermsId],
-    );
-    const { uuid: stemsUuid } = await cdrClient.uploader.uploadFile({
-      content:            audioBytes.slice(0, Math.min(1024 * 1024, audioBytes.length)),
+    // ── Step 4: Download vault (full track, download-gated) ───────────────────
+    const { uuid: downloadUuid } = await cdrClient.uploader.uploadFile({
+      content:            audioBytes,
       storageProvider:    storage,
       updatable:          false,
       writeConditionAddr: ADDRESSES.OWNER_WRITE_COND,
       writeConditionData: creatorCondData,
       readConditionAddr:  ADDRESSES.TIERED_READ_COND,
-      readConditionData:  commCondData,
-      accessAuxData:      "0x",
+      readConditionData:  encodeAbiParameters(
+        [{ type: "address" }, { type: "address" }, { type: "uint256" }],
+        [ADDRESSES.LICENSE_TOKEN, ipId, downloadTermsId],
+      ),
+      accessAuxData: "0x",
+    });
+    log("CDR Download", `uuid=${downloadUuid}`);
+
+    // ── Step 5: Stems vault (commercial-gated) ────────────────────────────────
+    const { uuid: stemsUuid } = await cdrClient.uploader.uploadFile({
+      content:            audioBytes,
+      storageProvider:    storage,
+      updatable:          false,
+      writeConditionAddr: ADDRESSES.OWNER_WRITE_COND,
+      writeConditionData: creatorCondData,
+      readConditionAddr:  ADDRESSES.TIERED_READ_COND,
+      readConditionData:  encodeAbiParameters(
+        [{ type: "address" }, { type: "address" }, { type: "uint256" }],
+        [ADDRESSES.LICENSE_TOKEN, ipId, commTermsId],
+      ),
+      accessAuxData: "0x",
     });
     log("CDR Stems", `uuid=${stemsUuid}`);
 
-    // ── Step 5: Upload metadata to IPFS ──────────────────────────────────────
+    // ── Step 6: Upload metadata to IPFS ──────────────────────────────────────
     const metadata    = JSON.stringify({ title, description, image: "" });
     const metadataCid = await storage.upload(new TextEncoder().encode(metadata), { pin: true });
     const metadataURI = `ipfs://${metadataCid}`;
     log("Metadata", `URI=${metadataURI}`);
 
-    // ── Step 6: Register in BackstageRegistry ────────────────────────────────
+    // ── Step 7: Register in BackstageRegistry (3 vaults in tier order) ────────
     const allTermsIds = spgResult.licenseTermsIds!;
     const hash = await walletClient.writeContract({
       address: ADDRESSES.BACKSTAGE_REGISTRY,
@@ -193,7 +206,7 @@ export async function POST(req: NextRequest) {
       args: [
         ipId,
         previewCid,
-        [fullUuid, stemsUuid],
+        [streamUuid, downloadUuid, stemsUuid],
         allTermsIds,
         metadataURI,
       ],
@@ -214,7 +227,8 @@ export async function POST(req: NextRequest) {
       workId,
       ipId,
       previewCid,
-      fullUuid,
+      streamUuid,
+      downloadUuid,
       stemsUuid,
       metadataURI,
     });

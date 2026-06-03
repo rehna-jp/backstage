@@ -61,6 +61,7 @@ export function TierModal({ work, onUnlocked }: Props) {
   const [step, setStep] = useState<Step>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
+  const isCreator = !!address && address.toLowerCase() === work.creator.toLowerCase();
   const availableTiers = Math.min(work.licenseTermsIds.length, 3) as 0 | 1 | 2 | 3;
 
   // Fetch minting fee for each tier from the PIL template
@@ -235,10 +236,12 @@ export function TierModal({ work, onUnlocked }: Props) {
 
               <button
                 onClick={() => handleBuy(tier)}
-                disabled={isBusy || step === "done"}
+                disabled={isBusy || step === "done" || isCreator}
                 className={cn(
                   "shrink-0 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all",
-                  isDone
+                  isCreator
+                    ? "bg-[--color-surface-3] text-[--color-text-muted] cursor-not-allowed opacity-60"
+                    : isDone
                     ? "bg-[--color-green]/15 text-[--color-green] cursor-default border border-[--color-green]/30"
                     : isBuying
                     ? "bg-[--color-accent]/20 text-[--color-accent] cursor-wait"
@@ -246,12 +249,12 @@ export function TierModal({ work, onUnlocked }: Props) {
                     ? "bg-[--color-surface-3] text-[--color-text-muted] cursor-not-allowed opacity-50"
                     : "text-white"
                 )}
-                style={!isDone && !isBuying && step !== "done" ? {
+                style={!isCreator && !isDone && !isBuying && step !== "done" ? {
                   background: "linear-gradient(135deg, #3b82f6, #2563eb)",
                   boxShadow: "0 0 14px rgb(59 130 246 / 0.25)",
                 } : undefined}
               >
-                {isDone ? "✓ Unlocked" : isBuying ? "Working…" : "Get Access"}
+                {isCreator ? "Your work" : isDone ? "✓ Unlocked" : isBuying ? "Working…" : "Get Access"}
               </button>
             </div>
 
@@ -299,6 +302,17 @@ export function TierModal({ work, onUnlocked }: Props) {
 
       {availableTiers === 0 && (
         <p className="text-sm text-[--color-text-muted] text-center py-8">No license tiers available for this work yet.</p>
+      )}
+
+      {isCreator && availableTiers > 0 && (
+        <div className="mt-2 flex items-center gap-2 rounded-xl border border-[--color-border] bg-[--color-surface-2] px-4 py-3">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[--color-amber] shrink-0">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p className="text-xs text-[--color-text-muted]">
+            You published this work. Purchases are open to other wallets.
+          </p>
+        </div>
       )}
 
       <p className="text-center text-[10px] text-[--color-text-muted] pt-1">

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // always fetch fresh works from chain
+
 import { createPublicClient, http, defineChain } from "viem";
 import { NavBar } from "@/components/NavBar";
 import { WorkCard } from "@/components/WorkCard";
@@ -47,7 +49,7 @@ async function fetchWorks(): Promise<{ id: number; work: Work; meta: WorkMeta | 
   });
 
   // Only show works that have all 3 vaults (fully set up)
-  const valid = deduped.filter(({ work }) => work.gatedVaultUuids.length >= 3);
+  const valid = deduped.filter(({ work }) => work.gatedVaultUuids.length >= 2);
 
   const results = await Promise.all(
     valid.map(async ({ id, work }) => {

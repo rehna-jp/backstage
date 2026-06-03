@@ -12,8 +12,9 @@ type StepStatus = "pending" | "running" | "done" | "error";
 const PIPELINE_STEPS = [
   "Registering IP Asset on Story",
   "Uploading preview to IPFS",
-  "Encrypting full track → CDR vault",
-  "Encrypting stems → CDR vault",
+  "Encrypting full track → Stream vault",
+  "Encrypting full track → Download vault",
+  "Encrypting stems → Commercial vault",
   "Pinning metadata",
   "Registering in Backstage",
 ];
