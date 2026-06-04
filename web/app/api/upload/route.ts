@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
   const downloadFee = parseFloat((body.get("downloadFee") as string | null) ?? "0.05");
   const commFee     = parseFloat((body.get("commFee")     as string | null) ?? "0.1");
   const audioFile   = body.get("audio") as File | null;
+  const coverImage  = body.get("coverImage") as File | null;
 
   if (!title.trim() || !audioFile) {
     return NextResponse.json({ error: "title and audio are required." }, { status: 400 });
@@ -191,8 +192,14 @@ export async function POST(req: NextRequest) {
     });
     log("CDR Stems", `uuid=${stemsUuid}`);
 
-    // ── Step 6: Upload metadata to IPFS ──────────────────────────────────────
-    const metadata    = JSON.stringify({ title, description, image: "" });
+    // ── Step 6: Upload cover art + metadata to IPFS ──────────────────────────
+    let imageCid = "";
+    if (coverImage) {
+      const coverBytes = new Uint8Array(await coverImage.arrayBuffer());
+      imageCid = await storage.upload(coverBytes, { pin: true });
+      log("Cover", `CID=${imageCid}`);
+    }
+    const metadata    = JSON.stringify({ title, description, image: imageCid ? `ipfs://${imageCid}` : "" });
     const metadataCid = await storage.upload(new TextEncoder().encode(metadata), { pin: true });
     const metadataURI = `ipfs://${metadataCid}`;
     log("Metadata", `URI=${metadataURI}`);

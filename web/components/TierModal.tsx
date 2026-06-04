@@ -165,7 +165,11 @@ export function TierModal({ work, onUnlocked }: Props) {
         apiUrl: cdrApiUrl,
       });
 
-      const ipfsGateway = process.env.NEXT_PUBLIC_IPFS_GATEWAY_URL ?? "http://127.0.0.1:8080/ipfs";
+      // Route IPFS fetches through the same-origin Next.js proxy so the browser
+      // doesn't need direct access to the local IPFS gateway port.
+      const ipfsGateway = typeof window !== "undefined"
+        ? `${window.location.origin}/api/ipfs`
+        : (process.env.NEXT_PUBLIC_IPFS_GATEWAY_URL ?? "http://127.0.0.1:8080/ipfs");
       const storage = new GatewayProvider({
         apiUrl:     "http://127.0.0.1:5001",
         gatewayUrl: ipfsGateway,

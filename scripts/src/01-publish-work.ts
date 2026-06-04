@@ -139,7 +139,7 @@ async function main() {
   const ipMeta = {
     title:       "Moonrise — Unreleased Demo",
     description: "A studio demo track — Backstage hackathon test asset.",
-    image:       "ipfs://bafybeibwzifw52ttrkqlikfzext5akxu7lz4xiwjgwzmqcpdzmp3n5z3uq",
+    image:       "ipfs://QmNan8PdqWiM2YWEPQW8yQYLXMpYeeyxSWFSkoHtyPAYRo",
     mediaType:   "audio/mp3",
     creators:    [{ name: "Demo Artist", address: account.address, contributionPercent: 100 }],
   };
@@ -276,6 +276,8 @@ async function main() {
     stemsUuid:         stemsResult.uuid,
     stemsCid:          stemsResult.cid,
     previewCid,
+    metadataURI:       `data:application/json;base64,${Buffer.from(ipMetaJSON).toString("base64")}`,
+    title:             ipMeta.title,
     createdAt:         new Date().toISOString(),
   }, null, 2));
 

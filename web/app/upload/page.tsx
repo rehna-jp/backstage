@@ -27,8 +27,11 @@ export default function UploadPage() {
   const [streamFee, setStream]  = useState("0.01");
   const [downloadFee, setDl]    = useState("0.05");
   const [commFee, setComm]      = useState("0.1");
-  const [audioFile, setAudio]   = useState<File | null>(null);
-  const [dragging, setDragging] = useState(false);
+  const [audioFile, setAudio]      = useState<File | null>(null);
+  const [coverFile, setCover]      = useState<File | null>(null);
+  const [coverPreview, setCoverPrev] = useState<string | null>(null);
+  const [dragging, setDragging]    = useState(false);
+  const coverInput = useRef<HTMLInputElement>(null);
   const [step, setStep]         = useState<UploadStep>("idle");
   const [stepStatuses, setStatuses] = useState<StepStatus[]>(PIPELINE_STEPS.map(() => "pending"));
   const [errorMsg, setError]    = useState("");
@@ -45,6 +48,14 @@ export default function UploadPage() {
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) setAudio(file);
+  };
+
+  const onCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setCover(file);
+      setCoverPrev(URL.createObjectURL(file));
+    }
   };
 
   async function handlePublish(e: React.FormEvent) {
@@ -74,6 +85,7 @@ export default function UploadPage() {
     form.append("downloadFee", downloadFee);
     form.append("commFee", commFee);
     form.append("audio", audioFile);
+    if (coverFile) form.append("coverImage", coverFile);
 
     try {
       const res = await fetch("/api/upload", { method: "POST", body: form });
@@ -208,6 +220,37 @@ export default function UploadPage() {
                   <p className="text-xs text-[--color-text-muted] mt-1">MP3, WAV, FLAC — any format</p>
                 </>
               )}
+            </div>
+          </div>
+
+          {/* Cover art */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[--color-text-muted] mb-2">
+              Cover art <span className="text-[--color-text-muted] normal-case tracking-normal font-normal">(optional)</span>
+            </label>
+            <div className="flex items-center gap-4">
+              <div
+                onClick={() => coverInput.current?.click()}
+                className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-xl border border-dashed border-[--color-border] bg-[--color-surface] cursor-pointer overflow-hidden hover:border-[--color-accent]/40 transition-colors"
+              >
+                <input ref={coverInput} type="file" accept="image/*" onChange={onCoverChange} className="hidden" />
+                {coverPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={coverPreview} alt="cover" className="h-full w-full object-cover" />
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[--color-text-muted]">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                )}
+              </div>
+              <div className="text-sm text-[--color-text-muted] leading-relaxed">
+                {coverFile ? (
+                  <p className="text-[--color-text-secondary]">{coverFile.name} · <button type="button" onClick={() => { setCover(null); setCoverPrev(null); }} className="text-[--color-accent] hover:underline">remove</button></p>
+                ) : (
+                  <p>Click to upload a cover image.<br /><span className="text-xs">JPG, PNG, WebP — shown on your work page.</span></p>
+                )}
+              </div>
             </div>
           </div>
 

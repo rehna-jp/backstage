@@ -2,6 +2,8 @@
 node_modules
 .pnpm-store
 
+.ipfs
+
 # Environment
 .env
 .env.local
@@ -24,3 +26,5 @@ contracts/broadcast
 
 # Temp/generated
 web/next-env.d.ts
+ipfs
+ipfs

@@ -1,21 +1,23 @@
 {
-  "ipId": "0x21239cd6F367d70Cb0ca7265F2D6cf7F9Af37Fec",
+  "ipId": "0x40E23DE2a2Bf8485B54B4C639d775dE684aBfA77",
   "collectionAddr": "0x7C5f0C9EFE69EE74A35332ad2F686ef50274E276",
   "streamTermsId": "1912",
   "downloadTermsId": "2835",
   "commercialTermsId": "2460",
-  "fullTrackUuid": 6045,
-  "fullTrackCid": "bafkreicrqsr3c7siseuj4wbxkictxuadfqjihfvikckspqzum5iaqtyzki",
-  "stemsUuid": 6046,
-  "stemsCid": "bafkreicz6s6g57rtdhmb4hehuz4cbait2dyost5em6mryftj2ohgeq5c7y",
+  "fullTrackUuid": 6206,
+  "fullTrackCid": "bafkreiey2jyov5itnxk75dqg3osqcs3zbfce3mvtu7tpv3ym4smpdnoufu",
+  "stemsUuid": 6207,
+  "stemsCid": "bafkreidcyesggqhc7tc3teuaqpxpqyu4yvutiouigkofwegjk2ytj72m7i",
   "previewCid": "bafkreif6ugii4nal54msbvdiu3tgq2ondfv6r35sf5johnunt7oi4vvbsy",
-  "createdAt": "2026-06-03T20:33:25.254Z",
-  "workId": 10,
-  "downloadVaultUuid": 6047,
-  "downloadVaultCid": "bafkreiepfe7aflnis4jtiyqqhvxp7m564cwekhld4znwrx4xzujfeihpjq",
+  "createdAt": "2026-06-04T02:52:18.656Z",
+  "workId": 15,
+  "downloadVaultUuid": 6211,
+  "downloadVaultCid": "bafkreiaewaryfbs4rxs6ise73xq4oynnz67sb23mls24wq2tdzj7dl5w7i",
   "vaultOrder": [
     "fullTrack (stream-gated)",
     "fullTrack (download-gated)",
     "stems (commercial-gated)"
-  ]
+  ],
+  "metadataURI": "data:application/json;base64,eyJ0aXRsZSI6Ik1vb25yaXNlIOKAlCBVbnJlbGVhc2VkIERlbW8iLCJkZXNjcmlwdGlvbiI6IkEgc3R1ZGlvIGRlbW8gdHJhY2sg4oCUIEJhY2tzdGFnZSBoYWNrYXRob24gdGVzdCBhc3NldC4iLCJpbWFnZSI6ImlwZnM6Ly9RbU5hbjhQZHFXaU0yWVdFUFFXOHlRWUxYTXBZZWV5eFNXRlNrb0h0eVBBWVJvIiwibWVkaWFUeXBlIjoiYXVkaW8vbXAzIiwiY3JlYXRvcnMiOlt7Im5hbWUiOiJEZW1vIEFydGlzdCIsImFkZHJlc3MiOiIweDEwOGYzODY3ZEFjQzA2MTZDNUQwODdmYjk0QjJFMWI2QmFGOTlFRGEiLCJjb250cmlidXRpb25QZXJjZW50IjoxMDB9XX0=",
+  "title": "Moonrise — Unreleased Demo"
 }
